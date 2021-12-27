@@ -1,0 +1,74 @@
+SET VAR_START_DATE = '01-sep-2021';
+SET VAR_END_DATE = '30-nov-2021';
+
+
+--select month,(count(Distinct(ExpenseUser))) AS EXPENSEUSER, (count(distinct(InvoiceUser))) as INVOICEUSER,(count(DualUser))as DualUser,admin from
+
+((select 
+  h.PersonID as ExpenseUser
+  ,I.PersonId as InvoiceUser
+  --,case when h.personid = i.personid then '1' else '0' END AS DualUser
+  ,case when h.personid = i.personid then '1' else '0'end as dualuser
+ -- , concat(max(p.FirstName), ' ', max(p.LastName)) as Name
+ -- , max(h.CustomerID) AS CUSTOMERID
+  , case when p.isadmin =1 then 'Y' else 'N' end as admin
+ -- , max(c.Name) AS CUSTOMERNAME
+  , month(h.submitdate) as month
+from "BRONZE_CR"."CR_C1_PROD_CHROME_EXPENSE"."TBL_EXPENSEREPORTHEADER" h
+join "BRONZE_CR"."CR_C1_PROD_CHROME_EXPENSE"."TBL_PERSON" p on p.PersonID = h.PersonID
+join "BRONZE_CR"."CR_C1_PROD_CHROME_EXPENSE"."TBL_CUSTOMER" c on c.CustomerID = h.CustomerID
+left outer join  "BRONZE_CR"."CR_C1_PROD_CHROME_EXPENSE"."TBL_INVOICEHEADER" I on  I.personid = p.PersonId
+where h.SubmitDate is not null
+and (h.submitdate >= $var_start_date and h.submitdate<=$var_end_date
+     or i.submitdate>= $var_start_date and i.submitdate<=$var_end_date)
+and h._FIVETRAN_DELETED = FALSE and p._FIVETRAN_DELETED = FALSE and c._FIVETRAN_DELETED = FALSE
+AND P.PERSONSTATUSID in (1,2,3)
+group by h.personid,i.personId,admin, month)
+ 
+union all
+(select 
+  h.PersonID as ExpenseUser
+  ,I.PersonId as InvoiceUser
+  --,case when h.personid = i.personid then '1' else '0' END AS DualUser
+  ,case when h.personid = i.personid then '1' else '0'end as dualuser
+ -- , concat(max(p.FirstName), ' ', max(p.LastName)) as Name
+ -- , max(h.CustomerID) AS CUSTOMERID
+  , case when p.isadmin =1 then 'Y' else 'N' end as admin
+ -- , max(c.Name) AS CUSTOMERNAME
+  , month(h.submitdate) as month
+from "BRONZE_CR"."CR_C2_PROD_CHROME_EXPENSE"."TBL_EXPENSEREPORTHEADER" h
+join "BRONZE_CR"."CR_C2_PROD_CHROME_EXPENSE"."TBL_PERSON" p on p.PersonID = h.PersonID
+join "BRONZE_CR"."CR_C2_PROD_CHROME_EXPENSE"."TBL_CUSTOMER" c on c.CustomerID = h.CustomerID
+left outer join  "BRONZE_CR"."CR_C2_PROD_CHROME_EXPENSE"."TBL_INVOICEHEADER" I on  I.personid = p.PersonId
+where h.SubmitDate is not null
+and (h.submitdate >= $var_start_date and h.submitdate<=$var_end_date
+     or i.submitdate>= $var_start_date and i.submitdate<=$var_end_date)
+and h._FIVETRAN_DELETED = FALSE and p._FIVETRAN_DELETED = FALSE and c._FIVETRAN_DELETED = FALSE
+AND P.PERSONSTATUSID in (1,2,3)
+group by h.personid,i.personId,admin, month)
+ 
+UNION ALL
+ 
+(select 
+  h.PersonID as ExpenseUser
+  ,I.PersonId as InvoiceUser
+  --,case when h.personid = i.personid then '1' else '0' END AS DualUser
+  ,case when h.personid = i.personid then '1' else '0'end as dualuser
+ -- , concat(max(p.FirstName), ' ', max(p.LastName)) as Name
+ -- , max(h.CustomerID) AS CUSTOMERID
+  , case when p.isadmin =1 then 'Y' else 'N' end as admin
+ -- , max(c.Name) AS CUSTOMERNAME
+  , month(h.submitdate) as month
+from "BRONZE_CR"."CR_C7_PROD_CHROME_EXPENSE"."TBL_EXPENSEREPORTHEADER" h
+join "BRONZE_CR"."CR_C7_PROD_CHROME_EXPENSE"."TBL_PERSON" p on p.PersonID = h.PersonID
+join "BRONZE_CR"."CR_C7_PROD_CHROME_EXPENSE"."TBL_CUSTOMER" c on c.CustomerID = h.CustomerID
+left outer join  "BRONZE_CR"."CR_C7_PROD_CHROME_EXPENSE"."TBL_INVOICEHEADER" I on  I.personid = p.PersonId
+where h.SubmitDate is not null
+and (h.submitdate >= $var_start_date and h.submitdate<=$var_end_date
+     or i.submitdate>= $var_start_date and i.submitdate<=$var_end_date)
+and h._FIVETRAN_DELETED = FALSE and p._FIVETRAN_DELETED = FALSE and c._FIVETRAN_DELETED = FALSE
+AND P.PERSONSTATUSID in (1,2,3)
+group by h.personid,i.personId,admin, month))
+
+
+--group by month, admin order by month
