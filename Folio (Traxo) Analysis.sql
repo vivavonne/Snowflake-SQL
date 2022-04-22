@@ -1,0 +1,88 @@
+SET VAR_START_DATE ='01-JAN-2021';
+SET VAR_END_DATE = getdate();
+
+select 'US' as region, year,month,customername, sum(lineitemcount) as lineitems from
+((SELECT
+YEAR (l.transactiondate) AS YEAR
+, month (l.transactiondate) as month
+, c.name as customername
+--, case when L.ISPARENT = 1 then 'Parent' else 'Child' end as FolioGrouping
+, COUNT(DISTINCT l.EXPENSEREPORTLINEITEMID) AS lineitemcount
+
+FROM "BRONZE_CR"."CR_C1_PROD_CHROME_EXPENSE"."TBL_EXPENSEREPORTHEADER" H
+, "BRONZE_CR"."CR_C1_PROD_CHROME_EXPENSE"."TBL_EXPENSEREPORTLINEITEM" L
+, "BRONZE_CR"."CR_C1_PROD_CHROME_EXPENSE"."TBL_EXPENSETRANSACTION"  T 
+, "BRONZE_CR"."CR_C1_PROD_CHROME_EXPENSE"."TBL_FEED" F 
+, "BRONZE_CR"."CR_C1_PROD_CHROME_EXPENSE"."TBL_CUSTOMER" C
+, "BRONZE_CR"."CR_C1_PROD_CHROME_EXPENSE"."TBL_CUSTOMERDATA" CD
+  
+WHERE H.EXPENSEREPORTHEADERID = L.EXPENSEREPORTHEADERID
+AND L.EXPENSETRANSACTIONID = T.EXPENSETRANSACTIONID
+AND T.FEEDID = F.FEEDID 
+AND T.CUSTOMERID = C.CUSTOMERID
+AND C.CUSTOMERID = CD.CUSTOMERID
+AND l.transactiondate>= $var_start_date and l.transactiondate<= $var_end_date
+AND H._FIVETRAN_DELETED = 'FALSE' AND L._FIVETRAN_DELETED = 'FALSE' AND T._FIVETRAN_DELETED = 'FALSE'
+and H.STATUSID IN (3,5)
+AND (F.NAME ='Traxo Email Memo' 
+     or F.NAME = 'Email Memo InProgress')
+     
+group by year, month, customername order by year, month)
+ 
+ union 
+
+(SELECT
+YEAR (l.transactiondate) AS YEAR
+, month (l.transactiondate) as month
+, c.name as customername
+--, case when L.ISPARENT = 1 then 'Parent' else 'Child' end as FolioGrouping
+, COUNT(DISTINCT l.EXPENSEREPORTLINEITEMID) AS lineitemcount
+
+FROM "BRONZE_CR"."CR_C2_PROD_CHROME_EXPENSE"."TBL_EXPENSEREPORTHEADER" H
+, "BRONZE_CR"."CR_C2_PROD_CHROME_EXPENSE"."TBL_EXPENSEREPORTLINEITEM" L
+, "BRONZE_CR"."CR_C2_PROD_CHROME_EXPENSE"."TBL_EXPENSETRANSACTION"  T 
+, "BRONZE_CR"."CR_C2_PROD_CHROME_EXPENSE"."TBL_FEED" F 
+, "BRONZE_CR"."CR_C2_PROD_CHROME_EXPENSE"."TBL_CUSTOMER" C
+, "BRONZE_CR"."CR_C2_PROD_CHROME_EXPENSE"."TBL_CUSTOMERDATA" CD
+  
+WHERE H.EXPENSEREPORTHEADERID = L.EXPENSEREPORTHEADERID
+AND L.EXPENSETRANSACTIONID = T.EXPENSETRANSACTIONID
+AND T.FEEDID = F.FEEDID 
+AND T.CUSTOMERID = C.CUSTOMERID
+AND C.CUSTOMERID = CD.CUSTOMERID
+AND l.transactiondate>= $var_start_date and l.transactiondate<= $var_end_date
+AND H._FIVETRAN_DELETED = 'FALSE' AND L._FIVETRAN_DELETED = 'FALSE' AND T._FIVETRAN_DELETED = 'FALSE'
+and H.STATUSID IN (3,5)
+AND (F.NAME ='Traxo Email Memo' 
+     or F.NAME = 'Email Memo InProgress')
+     
+group by year, month, customername order by year, month)
+ 
+ union all
+ 
+(SELECT
+YEAR (l.transactiondate) AS YEAR
+, month (l.transactiondate) as month
+, c.name as customername
+--, case when L.ISPARENT = 1 then 'Parent' else 'Child' end as FolioGrouping
+, COUNT(DISTINCT l.EXPENSEREPORTLINEITEMID) AS lineitemcount
+
+FROM "BRONZE_CR"."CR_C7_PROD_CHROME_EXPENSE"."TBL_EXPENSEREPORTHEADER" H
+, "BRONZE_CR"."CR_C7_PROD_CHROME_EXPENSE"."TBL_EXPENSEREPORTLINEITEM" L
+, "BRONZE_CR"."CR_C7_PROD_CHROME_EXPENSE"."TBL_EXPENSETRANSACTION"  T 
+, "BRONZE_CR"."CR_C7_PROD_CHROME_EXPENSE"."TBL_FEED" F 
+, "BRONZE_CR"."CR_C7_PROD_CHROME_EXPENSE"."TBL_CUSTOMER" C
+, "BRONZE_CR"."CR_C7_PROD_CHROME_EXPENSE"."TBL_CUSTOMERDATA" CD
+  
+WHERE H.EXPENSEREPORTHEADERID = L.EXPENSEREPORTHEADERID
+AND L.EXPENSETRANSACTIONID = T.EXPENSETRANSACTIONID
+AND T.FEEDID = F.FEEDID 
+AND T.CUSTOMERID = C.CUSTOMERID
+AND C.CUSTOMERID = CD.CUSTOMERID
+AND l.transactiondate>= $var_start_date and l.transactiondate<= $var_end_date
+AND H._FIVETRAN_DELETED = 'FALSE' AND L._FIVETRAN_DELETED = 'FALSE' AND T._FIVETRAN_DELETED = 'FALSE'
+and H.STATUSID IN (3,5)
+AND (F.NAME ='Traxo Email Memo' 
+     or F.NAME = 'Email Memo InProgress')
+     
+group by year, month, customername order by year, month)) group by region, year, month, customername order by year, month, customername
